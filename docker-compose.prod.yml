@@ -2,10 +2,35 @@ volumes:
   frontend-build:
 
 services:
+
   frontend:
+    depends_on:
+      - api
     build: ./frontend
     image: fullstackdocker/frontend:latest
     volumes:
       - frontend-build:/mnt
     # Copy the compiled production build to the volume
     command: sh -c "rm -rf /mnt/* && cp -a /src/build/* /mnt"
+
+  api:
+    build: ./api
+    image: fullstackdocker/api:latest
+    environment:
+      - ROCKET_ADDRESS=0.0.0.0
+      - ROCKET_PORT=8000
+
+  nginx:
+    depends_on:
+      - frontend
+      - api
+    image: nginx:1.21.6-alpine
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx:/etc/nginx/templates
+      - frontend-build:/usr/share/nginx/html
+    environment:
+      - FRONTEND_SERVER_NAME
+      - API_SERVER_NAME
+      - API_INNER_PORT

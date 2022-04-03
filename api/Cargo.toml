@@ -7,3 +7,7 @@ edition = "2021"
 
 [dependencies]
 rocket = "0.5.0-rc.1"
+
+[[bin]]
+name = "run-api"
+path = "src/main.rs"
