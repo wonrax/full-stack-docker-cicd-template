@@ -1,0 +1,11 @@
+volumes:
+  frontend-build:
+
+services:
+  frontend:
+    build: ./frontend
+    image: fullstackdocker/frontend:latest
+    volumes:
+      - frontend-build:/mnt
+    # Copy the compiled production build to the volume
+    command: sh -c "rm -rf /mnt/* && cp -a /src/build/* /mnt"
