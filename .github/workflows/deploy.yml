@@ -1,0 +1,63 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Prepare build folder and create .env file
+        run: |
+          mkdir build
+          cp docker-compose.prod.yml build
+          mkdir build/frontend
+          mkdir build/api
+          echo ${{ secrets.ENV_VARS }} > .env
+        # Both build/frontend and build/api are empty
+        # so docker-compose won't complain when run in prod machine
+      - name: Build Docker images and store inside build folder
+        run: |
+          docker-compose -f docker-compose.prod.yml build --no-cache --progress=plain
+          docker save $(docker images | sed '1d' | awk '{print $1 ":" $2 }') -o build/images.tar
+      - name: Archive and compress the build
+        run: |
+          tar -czvf build.tar.gz build/*
+          find build
+      - name: Copy compressed build to target machine
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.DEPLOY_HOST_ADDRESS }}
+          username: ${{ secrets.DEPLOY_HOST_USER }}
+          port: ${{ secrets.DEPLOY_HOST_SSH_PORT }}
+          key: ${{ secrets.DEPLOY_HOST_KEY }}
+          source: "build.tar.gz"
+          target: "~"
+      - name: Deploy on target machine
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEPLOY_HOST_ADDRESS }}
+          username: ${{ secrets.DEPLOY_HOST_USER }}
+          key: ${{ secrets.DEPLOY_HOST_KEY }}
+          port: ${{ secrets.DEPLOY_HOST_SSH_PORT }}
+          script_stop: true
+          script: |
+            cd ~
+            ls build.tar.gz
+            rm -rf build
+            mkdir build
+            tar -xzvf build.tar.gz build
+            rm build.tar.gz
+            cd build
+            docker load -i images.tar
+            rm images.tar
+            sudo docker-compose -f docker-compose.prod.yml up -d --no-cache
+            sudo docker system prune --all --force --volumes
+            sudo docker ps
+            sudo docker volume ls
+            sudo docker image ls
