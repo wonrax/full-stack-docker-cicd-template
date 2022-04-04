@@ -22,7 +22,7 @@ server {
     server_name ${API_SERVER_NAME}; # e.g. api.news.example.com
 
     location / {
-        proxy_pass http://api:8000;
+        proxy_pass http://api:${API_INNER_PORT};
     }
 
     access_log off;

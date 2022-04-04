@@ -1,9 +1,32 @@
 volumes:
   frontend-build:
+  mongo-data:
+  mongo-config:
 
 services:
+  
+  db:
+    container_name: mongodb
+    image: mongo:5
+    volumes:
+      - mongo-data:/data/db
+      - mongo-config:/data/configdb
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME
+      - MONGO_INITDB_ROOT_PASSWORD
+
+  api:
+    container_name: rocket-api
+    depends_on:
+      - db
+    build: ./api
+    image: fullstackdocker/api:latest
+    environment:
+      - ROCKET_ADDRESS=0.0.0.0
+      - ROCKET_PORT=$API_INNER_PORT
 
   frontend:
+    container_name: frontend-build-image
     depends_on:
       - api
     build: ./frontend
@@ -13,14 +36,8 @@ services:
     # Copy the compiled production build to the volume
     command: sh -c "rm -rf /mnt/* && cp -a /src/build/* /mnt"
 
-  api:
-    build: ./api
-    image: fullstackdocker/api:latest
-    environment:
-      - ROCKET_ADDRESS=0.0.0.0
-      - ROCKET_PORT=8000
-
   nginx:
+    container_name: nginx
     depends_on:
       - frontend
       - api
