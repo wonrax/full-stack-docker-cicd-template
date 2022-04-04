@@ -19,6 +19,7 @@ jobs:
           mkdir build/frontend
           mkdir build/api
           echo "${{ secrets.ENV_VARS }}" > .env
+          cp .env build
         # Both build/frontend and build/api are empty
         # so docker-compose won't complain when run in prod machine
       - name: Build Docker images and store inside build folder
@@ -56,8 +57,8 @@ jobs:
             cd build
             docker load -i images.tar
             rm images.tar
-            sudo docker-compose -f docker-compose.prod.yml up -d --no-cache
-            sudo docker system prune --all --force --volumes
-            sudo docker ps
-            sudo docker volume ls
-            sudo docker image ls
+            docker-compose -f docker-compose.prod.yml up -d --no-cache
+            docker system prune --all --force --volumes
+            docker ps
+            docker volume ls
+            docker image ls
