@@ -1,13 +1,6 @@
-# The extra .conf extension on the template file - this is not a typo. In
-# the docs for the nginx image it is suggested to name the file, for example,
-# default.conf.template. Upon startup, a script will take that file, substitute
-# the environment variables, and then output the file to /etc/nginx/conf.d/ with
-# the original file name, dropping the .template suffix. web service1 config.
-# More info: https://stackoverflow.com/a/62844707/11129119
-
 server {
     listen 80;
-    server_name ${FRONTEND_SERVER_NAME}; # e.g. news.example.com
+    server_name ${FRONTEND_HOST_NAME}; # e.g. news.example.com
 
     location / {
         root /usr/share/nginx/html;
@@ -19,7 +12,7 @@ server {
 
 server {
     listen 80;
-    server_name ${API_SERVER_NAME}; # e.g. api.news.example.com
+    server_name ${API_HOST_NAME}; # e.g. api.news.example.com
 
     location / {
         proxy_pass http://api:${API_PORT};

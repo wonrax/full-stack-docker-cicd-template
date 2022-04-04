@@ -1,13 +1,19 @@
 version: "3"
 
+volumes:
+  mongo-data:
+  mongo-config:
+
 services:
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev
-    image: fullstackdocker/frontend:dev-latest
+
+  mongo:
+    container_name: mongodb
+    image: mongo:5
     volumes:
-      - ./frontend:/src
+      - mongo-data:/data/db
+      - mongo-config:/data/configdb
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME
+      - MONGO_INITDB_ROOT_PASSWORD
     ports:
-      - 80:3000
-    command: sh -c "npm install && chmod -R 777 node_modules && npm run start"
+      - $MONGO_PORT:$MONGO_PORT

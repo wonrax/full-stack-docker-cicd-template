@@ -7,7 +7,7 @@ volumes:
 
 services:
   
-  db:
+  mongo:
     container_name: mongodb
     image: mongo:5
     volumes:
@@ -16,12 +16,13 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME
       - MONGO_INITDB_ROOT_PASSWORD
+    command: mongod --port $MONGO_PORT
     restart: always
 
   api:
     container_name: rocket-api
     depends_on:
-      - db
+      - mongo
     build: ./api
     image: fullstackdocker/api:latest
     environment:
@@ -52,7 +53,7 @@ services:
       - ./nginx:/etc/nginx/templates
       - frontend-build:/usr/share/nginx/html
     environment:
-      - FRONTEND_SERVER_NAME
-      - API_SERVER_NAME
+      - FRONTEND_HOST_NAME
+      - API_HOST_NAME
       - API_PORT
     restart: always
