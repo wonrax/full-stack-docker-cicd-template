@@ -27,9 +27,7 @@ jobs:
           docker-compose -f docker-compose.prod.yml build --no-cache --progress=plain --parallel
           docker save fullstackdocker/api:latest fullstackdocker/frontend:latest -o build/images.tar
       - name: Archive and compress the build
-        run: |
-          tar -czvf build.tar.gz build/*
-          find build
+        run: tar -czvf build.tar.gz build
       - name: Copy compressed build to target machine
         uses: appleboy/scp-action@master
         with:
@@ -51,7 +49,6 @@ jobs:
             cd ~
             ls build.tar.gz
             rm -rf build
-            mkdir build
             tar -xzvf build.tar.gz build
             rm build.tar.gz
             cd build
