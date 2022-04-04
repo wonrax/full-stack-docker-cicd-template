@@ -16,6 +16,7 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME
       - MONGO_INITDB_ROOT_PASSWORD
+    restart: always
 
   api:
     container_name: rocket-api
@@ -25,7 +26,8 @@ services:
     image: fullstackdocker/api:latest
     environment:
       - ROCKET_ADDRESS=0.0.0.0
-      - ROCKET_PORT=$API_INNER_PORT
+      - ROCKET_PORT=$API_PORT
+    restart: always
 
   frontend:
     container_name: frontend-build-image
@@ -52,4 +54,5 @@ services:
     environment:
       - FRONTEND_SERVER_NAME
       - API_SERVER_NAME
-      - API_INNER_PORT
+      - API_PORT
+    restart: always
