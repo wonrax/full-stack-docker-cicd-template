@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -18,13 +18,13 @@ jobs:
           cp docker-compose.prod.yml build
           mkdir build/frontend
           mkdir build/api
-          echo ${{ secrets.ENV_VARS }} > .env
+          echo "${{ secrets.ENV_VARS }}" > .env
         # Both build/frontend and build/api are empty
         # so docker-compose won't complain when run in prod machine
       - name: Build Docker images and store inside build folder
         run: |
-          docker-compose -f docker-compose.prod.yml build --no-cache --progress=plain
-          docker save $(docker images | sed '1d' | awk '{print $1 ":" $2 }') -o build/images.tar
+          docker-compose -f docker-compose.prod.yml build --no-cache --progress=plain --parallel
+          docker save fullstackdocker/api:latest fullstackdocker/frontend:latest -o build/images.tar
       - name: Archive and compress the build
         run: |
           tar -czvf build.tar.gz build/*
