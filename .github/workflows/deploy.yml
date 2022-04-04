@@ -16,6 +16,7 @@ jobs:
         run: |
           mkdir build
           cp docker-compose.prod.yml build
+          cp -r nginx build
           mkdir build/frontend
           mkdir build/api
           echo "${{ secrets.ENV_VARS }}" > .env
@@ -24,7 +25,7 @@ jobs:
         # so docker-compose won't complain when run in prod machine
       - name: Build Docker images and store inside build folder
         run: |
-          docker-compose -f docker-compose.prod.yml build --no-cache --progress=plain --parallel
+          docker-compose -f docker-compose.prod.yml build --no-cache --parallel
           docker save fullstackdocker/api:latest fullstackdocker/frontend:latest -o build/images.tar
       - name: Archive and compress the build
         run: tar -czvf build.tar.gz build
